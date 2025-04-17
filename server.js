@@ -38,14 +38,33 @@ class EventBus {
       console.log(chalk.blue(`EVENT: ${event}`), data);
     } else if (event === 'SVG_DISPLAYED') {
       console.log(chalk.green(`EVENT: ${event}`), data);
+    } else if (event === 'error') {
+      console.log(chalk.red(`ERROR EVENT: ${event}`), data);
+      console.log(chalk.red(`  Original event: ${data.originalEvent}`));
+      console.log(chalk.red(`  Error message: ${data.error}`));
     } else {
       console.log(`EVENT: ${event}`, data);
     }
     
     if (!this.listeners[event]) return;
-    this.listeners[event].forEach(cb => cb(data));
+    
+    this.listeners[event].forEach(cb => {
+      try {
+        cb(data);
+      } catch (error) {
+        console.log(chalk.red(`Error in handler for '${event}':`, error.message));
+        
+        // Don't emit error events for error handlers (prevent loops)
+        if (event !== 'error') {
+          this.emit('error', {
+            originalEvent: event,
+            error: error.message,
+            data
+          });
+        }
+      }
+    });
   }
-}
 
 // Event types
 const EventTypes = {
