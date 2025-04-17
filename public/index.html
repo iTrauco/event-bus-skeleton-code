@@ -1,0 +1,161 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Event Bus Demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+    .container { display: flex; gap: 20px; }
+    .panel { flex: 1; border: 1px solid #ccc; padding: 15px; border-radius: 5px; }
+    .svg-item { 
+      cursor: pointer; padding: 8px; margin: 5px 0; 
+      background: #eee; border-radius: 4px; transition: all 0.3s;
+    }
+    .svg-item:hover { background: #ddd; }
+    .svg-item.selected { background: #a0c0ff; }
+    .quadrant { 
+      width: 100px; height: 100px; margin: 5px; 
+      border: 1px solid #ccc; display: inline-block;
+      position: relative; text-align: center;
+    }
+    .active-svg {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(200, 200, 255, 0.5);
+    }
+    h3 { margin-top: 0; }
+    button { 
+      padding: 8px 12px; background: #4c5c96; color: white; 
+      border: none; border-radius: 4px; cursor: pointer;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Event Bus Demo</h2>
+  <p>Click on SVG files to trigger events (watch the terminal for event flow)</p>
+  
+  <div class="container">
+    <div class="panel">
+      <h3>SVG Files</h3>
+      <div id="svg-list"></div>
+    </div>
+    
+    <div class="panel">
+      <h3>Quadrants</h3>
+      <div id="quadrants">
+        <div class="quadrant" data-id="1">Quadrant 1</div>
+        <div class="quadrant" data-id="2">Quadrant 2</div>
+        <div class="quadrant" data-id="3">Quadrant 3</div>
+        <div class="quadrant" data-id="4">Quadrant 4</div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Connect to WebSocket server
+    const socket = new WebSocket(`ws://${window.location.host}`);
+    let selectedSvgId = null;
+    
+    // Event types
+    const EventTypes = {
+      SVG_SELECTED: 'SVG_SELECTED',
+      SVG_DISPLAYED: 'SVG_DISPLAYED',
+      COMMAND_SELECT_SVG: 'COMMAND_SELECT_SVG',
+      COMMAND_DISPLAY_SVG: 'COMMAND_DISPLAY_SVG'
+    };
+    
+    // Handle WebSocket messages
+    socket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      
+      if (message.type === 'SVG_LIST') {
+        renderSvgList(message.data);
+      } else if (message.type === EventTypes.SVG_SELECTED) {
+        // Handle SVG selection
+        selectedSvgId = message.data.id;
+        renderSvgList();
+      } else if (message.type === EventTypes.SVG_DISPLAYED) {
+        // Handle SVG display
+        renderActiveQuadrant(message.data);
+      }
+    };
+    
+    // Render SVG list
+    function renderSvgList(svgFiles = []) {
+      const listElement = document.getElementById('svg-list');
+      if (!listElement) return;
+      
+      // If we have new data, store it
+      if (svgFiles.length > 0) {
+        window.svgFiles = svgFiles;
+      }
+      
+      // Render the files
+      if (!window.svgFiles || window.svgFiles.length === 0) {
+        listElement.innerHTML = '<div>No SVG files available</div>';
+        return;
+      }
+      
+      listElement.innerHTML = '';
+      window.svgFiles.forEach(file => {
+        const item = document.createElement('div');
+        item.className = `svg-item ${file.id === selectedSvgId ? 'selected' : ''}`;
+        item.textContent = file.name;
+        item.onclick = () => handleSvgClick(file);
+        listElement.appendChild(item);
+      });
+    }
+    
+    // Handle SVG file click
+    function handleSvgClick(file) {
+      // Send selection command
+      socket.send(JSON.stringify({
+        type: EventTypes.COMMAND_SELECT_SVG,
+        data: file
+      }));
+    }
+    
+    // Handle quadrant click
+    function setupQuadrants() {
+      const quadrants = document.querySelectorAll('.quadrant');
+      quadrants.forEach(quadrant => {
+        quadrant.onclick = () => {
+          if (!selectedSvgId) {
+            alert('Please select an SVG file first');
+            return;
+          }
+          
+          const quadrantId = parseInt(quadrant.dataset.id);
+          const file = window.svgFiles.find(f => f.id === selectedSvgId);
+          
+          // Send display command
+          socket.send(JSON.stringify({
+            type: EventTypes.COMMAND_DISPLAY_SVG,
+            data: { ...file, quadrant: quadrantId }
+          }));
+        };
+      });
+    }
+    
+    // Render active quadrant
+    function renderActiveQuadrant(data) {
+      const quadrant = document.querySelector(`.quadrant[data-id="${data.quadrant}"]`);
+      if (!quadrant) return;
+      
+      // Clear existing content
+      const existing = quadrant.querySelector('.active-svg');
+      if (existing) existing.remove();
+      
+      // Add new content
+      const svgElement = document.createElement('div');
+      svgElement.className = 'active-svg';
+      svgElement.textContent = data.name;
+      quadrant.appendChild(svgElement);
+    }
+    
+    // Initialize
+    setupQuadrants();
+  </script>
+</body>
+</html>

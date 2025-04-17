@@ -20,7 +20,9 @@
     "electron": "^35.1.5",
     "electron-builder": "^24.13.3",
     "electron-devtools-installer": "^4.0.0",
-    "nodemon": "^3.1.9"
+    "express": "^5.1.0",
+    "nodemon": "^3.1.9",
+    "ws": "^8.18.1"
   },
   "build": {
     "appId": "com.electron.obs-transparent-ui",
