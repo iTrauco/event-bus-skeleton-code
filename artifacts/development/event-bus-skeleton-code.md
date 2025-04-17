@@ -1,7 +1,40 @@
-SVG Overlay System Skeletons and Implementation Strategy
-Skeleton Code Blocks
-constants.js
-javascriptexport const EventTypes = {
+# Event Bus Implementation Skeleton Code
+
+## Core Files Structure
+
+```
+project-root/
+├── renderer/
+│   ├── core/
+│   │   └── event-bus.js         # Event communication
+│   ├── config/
+│   │   └── constants.js         # Event definitions
+│   ├── store/
+│   │   ├── app-store.js         # State management
+│   │   └── reducers/
+│   │       ├── index.js
+│   │       ├── svg-reducer.js
+│   │       └── drag-reducer.js
+│   ├── services/
+│   │   ├── service-provider.js
+│   │   ├── svg-service.js
+│   │   └── drag-service.js
+│   ├── components/
+│   │   ├── component-factory.js
+│   │   ├── svg-list.js
+│   │   └── svg-controller.js
+│   ├── utils/
+│   │   ├── dom-utils.js
+│   │   └── svg-utils.js
+│   └── index.js                 # Entry point
+```
+
+## Skeleton Code
+
+### constants.js
+```javascript
+// Event types used by the event bus
+export const EventTypes = {
   SVG_SELECTED: 'SVG_SELECTED',
   SVG_DISPLAYED: 'SVG_DISPLAYED',
   SVG_REMOVED: 'SVG_REMOVED',
@@ -36,20 +69,17 @@ export const ClassNames = {
   SELECTED: 'selected'
 };
 
-export const Routes = {
-  HOME: 'home',
-  SETTINGS: 'settings',
-  ABOUT: 'about'
-};
-
 export const LogLevel = {
   INFO: 'INFO',
   WARN: 'WARN',
   ERROR: 'ERROR',
   DEBUG: 'DEBUG'
 };
-event-bus.js
-javascriptimport { LogLevel } from '../config/constants.js';
+```
+
+### event-bus.js
+```javascript
+import { LogLevel } from '../config/constants.js';
 
 class EventBus {
   constructor() {
@@ -99,8 +129,11 @@ class EventBus {
 }
 
 export const eventBus = new EventBus();
-app-store.js
-javascriptimport { LogLevel } from '../config/constants.js';
+```
+
+### app-store.js
+```javascript
+import { LogLevel } from '../config/constants.js';
 import rootReducer from './reducers/index.js';
 
 function createStore(reducer) {
@@ -157,62 +190,119 @@ export const ActionTypes = {
   DRAG_START: 'DRAG_START',
   DRAG_END: 'DRAG_END'
 };
-index.js
-javascriptimport { EventTypes, LogLevel, ElementIds } from './config/constants.js';
-import { appStore, ActionTypes } from './store/app-store.js';
-import { eventBus } from './core/event-bus.js';
-import { serviceProvider } from './services/service-provider.js';
-import { svgService } from './services/svg-service.js';
-import { dragService } from './services/drag-service.js';
-import { componentFactory } from './components/component-factory.js';
-import { svgList } from './components/svg-list.js';
-import { svgController } from './components/svg-controller.js';
+```
 
-async function initializeApp() {
-  console.log(`[${LogLevel.INFO}] Starting application initialization`);
-  
-  try {
-    // Register services
-    serviceProvider.register('svg', svgService);
-    serviceProvider.register('drag', dragService);
+### reducers/index.js
+```javascript
+import { LogLevel } from '../../config/constants.js';
+import svgReducer from './svg-reducer.js';
+import uiReducer from './ui-reducer.js';
+import dragReducer from './drag-reducer.js';
+
+export function combineReducers(reducers) {
+  return (state = {}, action) => {
+    const nextState = {};
     
-    // Initialize services
-    serviceProvider.initializeServices();
+    Object.entries(reducers).forEach(([key, reducer]) => {
+      nextState[key] = reducer(state[key], action);
+    });
     
-    // Register components
-    componentFactory.register('svg-list', svgList);
-    componentFactory.register('svg-controller', svgController);
-    
-    // Initialize components
-    componentFactory.initializeComponents();
-    
-    console.log(`[${LogLevel.INFO}] Application initialization complete`);
-    return true;
-  } catch (error) {
-    console.log(`[${LogLevel.ERROR}] Application initialization failed: ${error.message}`);
-    return false;
+    return nextState;
+  };
+}
+
+const rootReducer = combineReducers({
+  svg: svgReducer,
+  ui: uiReducer,
+  drag: dragReducer
+});
+
+export default rootReducer;
+```
+
+### reducers/svg-reducer.js
+```javascript
+import { LogLevel } from '../../config/constants.js';
+
+const initialState = {
+  svgFiles: [],
+  activeSvgs: [],
+  selectedSvgId: null
+};
+
+export function svgReducer(state = initialState, action) {
+  switch (action.type) {
+    case 'SET_SVG_FILES':
+      return {
+        ...state,
+        svgFiles: action.payload
+      };
+      
+    case 'SET_SELECTED_SVG_ID':
+      return {
+        ...state,
+        selectedSvgId: action.payload
+      };
+      
+    case 'ADD_ACTIVE_SVG':
+      return state;
+      
+    case 'REMOVE_ACTIVE_SVG':
+      return state;
+      
+    case 'UPDATE_SVG_VISIBILITY':
+      return state;
+      
+    case 'UPDATE_ALL_SVG_VISIBILITY':
+      return state;
+      
+    case 'UPDATE_SVG_POSITION':
+      return state;
+      
+    default:
+      return state;
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  console.log(`[${LogLevel.INFO}] Document loaded, starting initialization`);
-  
-  initializeApp().then((success) => {
-    if (success) {
-      console.log(`[${LogLevel.INFO}] Application ready for use`);
-    } else {
-      console.log(`[${LogLevel.ERROR}] Application failed to initialize properly`);
-    }
-  });
-});
+export default svgReducer;
+```
 
-window.App = {
-  version: '1.0.0',
-  eventBus,
-  store: appStore
+### reducers/drag-reducer.js
+```javascript
+import { LogLevel } from '../../config/constants.js';
+
+const initialState = {
+  dragModeEnabled: false,
+  draggedElementId: null,
+  dragStartPosition: null,
+  isDragging: false
 };
-service-provider.js
-javascriptimport { eventBus } from '../core/event-bus.js';
+
+export function dragReducer(state = initialState, action) {
+  switch (action.type) {
+    case 'SET_DRAG_MODE':
+      return {
+        ...state,
+        dragModeEnabled: action.payload
+      };
+      
+    case 'DRAG_START':
+      return state;
+      
+    case 'DRAG_END':
+      return state;
+      
+    default:
+      return state;
+  }
+}
+
+export default dragReducer;
+```
+
+### service-provider.js
+```javascript
+import { eventBus } from '../core/event-bus.js';
 import { LogLevel } from '../config/constants.js';
 
 class ServiceProvider {
@@ -258,8 +348,11 @@ class ServiceProvider {
 }
 
 export const serviceProvider = new ServiceProvider();
-svg-service.js
-javascriptimport { eventBus } from '../core/event-bus.js';
+```
+
+### svg-service.js
+```javascript
+import { eventBus } from '../core/event-bus.js';
 import { appStore, ActionTypes } from '../store/app-store.js';
 import { EventTypes, LogLevel } from '../config/constants.js';
 
@@ -293,8 +386,11 @@ class SvgService {
 }
 
 export const svgService = new SvgService();
-drag-service.js
-javascriptimport { eventBus } from '../core/event-bus.js';
+```
+
+### drag-service.js
+```javascript
+import { eventBus } from '../core/event-bus.js';
 import { appStore, ActionTypes } from '../store/app-store.js';
 import { EventTypes, LogLevel, ClassNames } from '../config/constants.js';
 
@@ -323,8 +419,11 @@ class DragService {
 }
 
 export const dragService = new DragService();
-component-factory.js
-javascriptimport { EventTypes, LogLevel } from '../config/constants.js';
+```
+
+### component-factory.js
+```javascript
+import { EventTypes, LogLevel } from '../config/constants.js';
 import { eventBus } from '../core/event-bus.js';
 
 class ComponentFactory {
@@ -366,8 +465,11 @@ class ComponentFactory {
 }
 
 export const componentFactory = new ComponentFactory();
-svg-list.js
-javascriptimport { EventTypes, ElementIds, ClassNames, LogLevel } from '../config/constants.js';
+```
+
+### svg-list.js
+```javascript
+import { EventTypes, ElementIds, ClassNames, LogLevel } from '../config/constants.js';
 import { eventBus } from '../core/event-bus.js';
 import { appStore, ActionTypes } from '../store/app-store.js';
 
@@ -417,8 +519,11 @@ class SvgList {
 }
 
 export const svgList = new SvgList();
-svg-controller.js
-javascriptimport { EventTypes, ElementIds, ClassNames, LogLevel } from '../config/constants.js';
+```
+
+### svg-controller.js
+```javascript
+import { EventTypes, ElementIds, ClassNames, LogLevel } from '../config/constants.js';
 import { eventBus } from '../core/event-bus.js';
 import { appStore, ActionTypes } from '../store/app-store.js';
 
@@ -481,9 +586,13 @@ class SvgController {
 }
 
 export const svgController = new SvgController();
-dom-utils.js
-javascriptexport const DomUtils = {
-  createElement(tag, attributes = {}, textContent = '') {
+```
+
+### dom-utils.js
+```javascript
+// Minimal dom-utils.js
+export const DomUtils = {
+  createElement(tag, attributes = {}, content = '') {
     const element = document.createElement(tag);
     
     // Set attributes
@@ -499,9 +608,9 @@ javascriptexport const DomUtils = {
       }
     });
     
-    // Set text content if provided
-    if (textContent) {
-      element.textContent = textContent;
+    // Set content if provided
+    if (content) {
+      element.textContent = content;
     }
     
     return element;
@@ -514,13 +623,16 @@ javascriptexport const DomUtils = {
   },
   
   setStyles(element, styles) {
-    Object.entries(styles).forEach(([property, value]) => {
-      element.style[property] = value;
+    Object.entries(styles).forEach(([key, value]) => {
+      element.style[key] = value;
     });
   }
 };
-svg-utils.js
-javascriptexport const SvgUtils = {
+```
+
+### svg-utils.js
+```javascript
+export const SvgUtils = {
   sanitizeSvgContent(svgContent) {
     return svgContent;
   },
@@ -538,181 +650,96 @@ javascriptexport const SvgUtils = {
     return document.createElement('div');
   }
 };
-reducers/index.js
-javascriptimport { LogLevel } from '../../config/constants.js';
-import svgReducer from './svg-reducer.js';
-import uiReducer from './ui-reducer.js';
-import dragReducer from './drag-reducer.js';
+```
 
-export function combineReducers(reducers) {
-  return (state = {}, action) => {
-    const nextState = {};
+### index.js
+```javascript
+import { EventTypes, LogLevel, ElementIds } from './config/constants.js';
+import { appStore, ActionTypes } from './store/app-store.js';
+import { eventBus } from './core/event-bus.js';
+import { serviceProvider } from './services/service-provider.js';
+import { svgService } from './services/svg-service.js';
+import { dragService } from './services/drag-service.js';
+import { componentFactory } from './components/component-factory.js';
+import { svgList } from './components/svg-list.js';
+import { svgController } from './components/svg-controller.js';
+
+async function initializeApp() {
+  console.log(`[${LogLevel.INFO}] Starting application initialization`);
+  
+  try {
+    // Register services
+    serviceProvider.register('svg', svgService);
+    serviceProvider.register('drag', dragService);
     
-    Object.entries(reducers).forEach(([key, reducer]) => {
-      nextState[key] = reducer(state[key], action);
-    });
+    // Initialize services
+    serviceProvider.initializeServices();
     
-    return nextState;
-  };
+    // Register components
+    componentFactory.register('svg-list', svgList);
+    componentFactory.register('svg-controller', svgController);
+    
+    // Initialize components
+    componentFactory.initializeComponents();
+    
+    console.log(`[${LogLevel.INFO}] Application initialization complete`);
+    return true;
+  } catch (error) {
+    console.log(`[${LogLevel.ERROR}] Application initialization failed: ${error.message}`);
+    return false;
+  }
 }
 
-const rootReducer = combineReducers({
-  svg: svgReducer,
-  ui: uiReducer,
-  drag: dragReducer
+document.addEventListener('DOMContentLoaded', () => {
+  console.log(`[${LogLevel.INFO}] Document loaded, starting initialization`);
+  
+  initializeApp().then((success) => {
+    if (success) {
+      console.log(`[${LogLevel.INFO}] Application ready for use`);
+    } else {
+      console.log(`[${LogLevel.ERROR}] Application failed to initialize properly`);
+    }
+  });
 });
 
-export default rootReducer;
-reducers/svg-reducer.js
-javascriptimport { LogLevel } from '../../config/constants.js';
-
-const initialState = {
-  svgFiles: [],
-  activeSvgs: [],
-  selectedSvgId: null
+window.App = {
+  version: '1.0.0',
+  eventBus,
+  store: appStore
 };
+```
 
-export function svgReducer(state = initialState, action) {
-  switch (action.type) {
-    case 'SET_SVG_FILES':
-      return {
-        ...state,
-        svgFiles: action.payload
-      };
-      
-    case 'SET_SELECTED_SVG_ID':
-      return {
-        ...state,
-        selectedSvgId: action.payload
-      };
-      
-    case 'ADD_ACTIVE_SVG':
-      return state;
-      
-    case 'REMOVE_ACTIVE_SVG':
-      return state;
-      
-    case 'UPDATE_SVG_VISIBILITY':
-      return state;
-      
-    case 'UPDATE_ALL_SVG_VISIBILITY':
-      return state;
-      
-    case 'UPDATE_SVG_POSITION':
-      return state;
-      
-    default:
-      return state;
-  }
-}
+## Event Flow Diagram
 
-export default svgReducer;
-reducers/ui-reducer.js
-javascriptimport { LogLevel, Routes } from '../../config/constants.js';
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│  Component  │───▶│  Event Bus  │───▶│   Service   │
+└─────────────┘    └─────────────┘    └─────────────┘
+       ▲                                     │
+       │                                     ▼
+┌─────────────┐                       ┌─────────────┐
+│     UI      │◀──────────────────────│    Store    │
+└─────────────┘                       └─────────────┘
+```
 
-const initialState = {
-  controlsVisible: true,
-  activeRoute: Routes.HOME,
-  selectedQuadrant: null
-};
+## Implementation Phases
 
-export function uiReducer(state = initialState, action) {
-  switch (action.type) {
-    case 'SET_CONTROLS_VISIBLE':
-      return {
-        ...state,
-        controlsVisible: action.payload
-      };
-      
-    case 'SET_ACTIVE_ROUTE':
-      return {
-        ...state,
-        activeRoute: action.payload
-      };
-      
-    case 'SET_SELECTED_QUADRANT':
-      return {
-        ...state,
-        selectedQuadrant: action.payload
-      };
-      
-    default:
-      return state;
-  }
-}
+1. **Phase 1: Event Bus Core**
+   - Set up event bus infrastructure
+   - Implement store and reducers
+   - Test basic event emission/subscription
 
-export default uiReducer;
-reducers/drag-reducer.js
-javascriptimport { LogLevel } from '../../config/constants.js';
+2. **Phase 2: Service Layer**
+   - Implement service provider 
+   - Add SVG service with event handlers
+   - Connect services to store
 
-const initialState = {
-  dragModeEnabled: false,
-  draggedElementId: null,
-  dragStartPosition: null,
-  isDragging: false
-};
+3. **Phase 3: Component Layer**
+   - Set up component factory
+   - Implement SVG list and controller
+   - Connect components to services via events
 
-export function dragReducer(state = initialState, action) {
-  switch (action.type) {
-    case 'SET_DRAG_MODE':
-      return {
-        ...state,
-        dragModeEnabled: action.payload
-      };
-      
-    case 'DRAG_START':
-      return state;
-      
-    case 'DRAG_END':
-      return state;
-      
-    default:
-      return state;
-  }
-}
-
-export default dragReducer;
-preload.js
-javascript(function() {
-  window.api = {
-    send: (channel, data) => {
-      console.log(`[MOCK] Send to ${channel}:`, data);
-    },
-    
-    receive: (channel, func) => {
-      console.log(`[MOCK] Setup receiver for ${channel}`);
-    },
-    
-    loadSvgs: async () => {
-      console.log('[MOCK] loadSvgs called');
-      return [
-        {
-          id: 'svg-1',
-          name: 'Circle.svg',
-          path: '/path/to/circle.svg'
-        },
-        {
-          id: 'svg-2',
-          name: 'Square.svg',
-          path: '/path/to/square.svg'
-        }
-      ];
-    },
-    
-    readSvgFile: async (filePath) => {
-      console.log('[MOCK] readSvgFile called:', filePath);
-      return '<svg width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="red"/></svg>';
-    }
-  };
-  
-  window.fs = {
-    readFile: (filePath, options = {}) => {
-      return new Promise((resolve, reject) => {
-        console.log('[MOCK] fs.readFile called:', filePath);
-        resolve('<svg width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="red"/></svg>');
-      });
-    }
-  };
-  
-  console.log('Browser-compatible preload script loaded');
-})();
+4. **Phase 4: Drag System**
+   - Implement drag service
+   - Add drag state management
+   - Connect drag system to UI
