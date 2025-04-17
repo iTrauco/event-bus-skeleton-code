@@ -1,0 +1,42 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Event Bus Demo</title>
+  <style>
+    .log {
+      background: #f0f0f0;
+      padding: 10px;
+      height: 200px;
+      overflow-y: scroll;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+    .svg-item {
+      cursor: pointer;
+      padding: 8px;
+      margin: 4px 0;
+      background: #eee;
+      border-radius: 4px;
+    }
+    .svg-item:hover {
+      background: #ddd;
+    }
+    .selected {
+      background: #a0c0ff;
+    }
+  </style>
+</head>
+<body>
+  <h2>SVG Overlay System</h2>
+  
+  <div id="svg-file-list">
+    <!-- SVG items will be added here -->
+  </div>
+  
+  <h3>Event Log</h3>
+  <div id="log" class="log"></div>
+  
+  <script type="module" src="demo.js"></script>
+</body>
+</html>
