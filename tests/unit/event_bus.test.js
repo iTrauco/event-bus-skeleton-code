@@ -1,4 +1,13 @@
-// tests/unit/event_bus.test.js
+/**
+ * Unit Tests for EventBus
+ * 
+ * This file contains Jest tests for the EventBus implementation, focusing on:
+ * - Basic event subscription and emission
+ * - Error handling for event callbacks
+ * - Prevention of infinite error loops
+ * 
+ * Run these tests with: npm test
+ */
 import { EventBus } from '../../renderer/core/event_bus.js';
 
 describe('EventBus', () => {
