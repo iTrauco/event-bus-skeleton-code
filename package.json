@@ -1,0 +1,45 @@
+{
+  "name": "obs-transparent-ui",
+  "version": "1.0.0",
+  "description": "SVG Overlay System for OBS",
+  "main": "main/main.js",
+  "scripts": {
+    "test": "jest",
+    "dev": "nodemon --watch main --watch preload.js --exec \"electron .\"",
+    "dev:hot": "cross-env HOT_RELOAD=true electron .",
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "dependencies": {
+    "electron-reload": "^2.0.0-alpha.1",
+    "three": "^0.175.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "electron": "^35.1.5",
+    "electron-builder": "^24.13.3",
+    "electron-devtools-installer": "^4.0.0",
+    "nodemon": "^3.1.9"
+  },
+  "build": {
+    "appId": "com.electron.obs-transparent-ui",
+    "productName": "OBS Transparent UI",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main/**/*",
+      "renderer/**/*",
+      "styles/**/*",
+      "index.html",
+      "preload.js",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable"
+    }
+  },
+  "author": "",
+  "license": "ISC"
+}
+
