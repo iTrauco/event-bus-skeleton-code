@@ -74,7 +74,10 @@ export class EventBus {
       try {
         callback(data);
       } catch (error) {
-        console.error(`Error in '${event}' event handler:`, error);
+        // 🔴🔴🔴 THIS IS THE CHANGE: Only log errors in non-test environments 🔴🔴🔴
+        if (process.env.NODE_ENV !== 'test') {
+          console.error(`Error in '${event}' event handler:`, error);
+        }
         
         // Special handling for error events to prevent infinite loops
         if (event !== 'error') {

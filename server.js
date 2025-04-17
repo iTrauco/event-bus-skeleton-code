@@ -3,6 +3,7 @@ const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
 const chalk = require('chalk');
+const { exec } = require('child_process'); // 🚀🚀🚀 ADDED: exec for opening browser
 
 // Initialize Express app, HTTP server, and WebSocket server
 const app = express();
@@ -18,18 +19,18 @@ class EventBus {
     this.listeners = {};
     console.log(chalk.blue('EventBus initialized'));
   }
-
+  
   on(event, callback) {
     if (!this.listeners[event]) this.listeners[event] = [];
     this.listeners[event].push(callback);
     return () => this.off(event, callback);
   }
-
+  
   off(event, callback) {
     if (!this.listeners[event]) return;
     this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
   }
-
+  
   emit(event, data) {
     // Color-coded terminal logging
     if (event.startsWith('COMMAND_')) {
@@ -39,6 +40,7 @@ class EventBus {
     } else if (event === 'SVG_DISPLAYED') {
       console.log(chalk.green(`EVENT: ${event}`), data);
     } else if (event === 'error') {
+      // ✅✅✅ KEPT: Special error event handling ✅✅✅
       console.log(chalk.red(`ERROR EVENT: ${event}`), data);
       console.log(chalk.red(`  Original event: ${data.originalEvent}`));
       console.log(chalk.red(`  Error message: ${data.error}`));
@@ -48,6 +50,10 @@ class EventBus {
     
     if (!this.listeners[event]) return;
     
+    // 🗑️🗑️🗑️ OLD CODE WITHOUT ERROR HANDLING (REMOVED):
+    // this.listeners[event].forEach(cb => cb(data));
+    
+    // ✅✅✅ KEPT: Try/catch blocks for error handling ✅✅✅
     this.listeners[event].forEach(cb => {
       try {
         cb(data);
@@ -65,13 +71,15 @@ class EventBus {
       }
     });
   }
+}
 
 // Event types
 const EventTypes = {
   SVG_SELECTED: 'SVG_SELECTED',
   SVG_DISPLAYED: 'SVG_DISPLAYED',
   COMMAND_SELECT_SVG: 'COMMAND_SELECT_SVG',
-  COMMAND_DISPLAY_SVG: 'COMMAND_DISPLAY_SVG'
+  COMMAND_DISPLAY_SVG: 'COMMAND_DISPLAY_SVG',
+  TRIGGER_ERROR: 'TRIGGER_ERROR' // ✅✅✅ KEPT: Error event type ✅✅✅
 };
 
 // Create event bus
@@ -90,15 +98,21 @@ wss.on('connection', (ws) => {
   ];
   
   ws.send(JSON.stringify({ type: 'SVG_LIST', data: svgFiles }));
-
+  
   // Handle messages from browser
   ws.on('message', (message) => {
-    const { type, data } = JSON.parse(message);
+    // 🗑️🗑️🗑️ OLD CODE WITH TYPE ERROR (REMOVED):
+    // const { type, data } = JSON.parse(message);
+    
+    // ✅✅✅ KEPT: Fix for destructuring syntax error ✅✅✅
+    const parsed = JSON.parse(message);
+    const type = parsed.type;
+    const data = parsed.data;
     
     // Emit events to the event bus
     eventBus.emit(type, data);
   });
-
+  
   // Set up event handlers
   eventBus.on(EventTypes.COMMAND_SELECT_SVG, data => {
     console.log(chalk.blue('SVG Service processing selection:'), data.id);
@@ -109,7 +123,7 @@ wss.on('connection', (ws) => {
       ws.send(JSON.stringify({ type: EventTypes.SVG_SELECTED, data }));
     }, 500);
   });
-
+  
   eventBus.on(EventTypes.COMMAND_DISPLAY_SVG, data => {
     console.log(chalk.blue('SVG Service processing display:'), data);
     
@@ -122,11 +136,24 @@ wss.on('connection', (ws) => {
       ws.send(JSON.stringify({ type: EventTypes.SVG_DISPLAYED, data }));
     }, 500);
   });
+  
+  // ✅✅✅ KEPT: Error handler for testing ✅✅✅
+  eventBus.on(EventTypes.TRIGGER_ERROR, () => {
+    throw new Error('This is a test error');
+  });
 });
+
+// 🗑️🗑️🗑️ DUPLICATE ERROR HANDLER (REMOVED):
+// eventBus.on('TRIGGER_ERROR', () => {
+//   throw new Error('This is a test error');
+// });
 
 // Start server
 const PORT = 3000;
 server.listen(PORT, () => {
   console.log(chalk.green(`Server running at http://localhost:${PORT}`));
-  console.log(chalk.blue('Open the browser to interact with the event bus demo'));
+  console.log(chalk.blue('Opening browser with unique window name...'));
+  
+  // 🚀🚀🚀 ADDED: Open Chrome with unique window name 🚀🚀🚀
+  exec('google-chrome --app=http://localhost:3000 --app-window-name="EventBusTerminal"');
 });

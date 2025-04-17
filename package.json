@@ -17,7 +17,7 @@
     "three": "^0.175.0"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.23.9",
+    "@babel/preset-env": "^7.26.9",
     "babel-jest": "^29.7.0",
     "chalk": "^4.1.2",
     "cross-env": "^7.0.3",
