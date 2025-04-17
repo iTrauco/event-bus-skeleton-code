@@ -1,0 +1,210 @@
+# ──────────────────────────────
+# Node.js
+# ──────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+.build/
+.cache/
+.next/
+out/
+*.tsbuildinfo
+
+# Ignore dotenv config
+.env
+.env.*
+
+
+# ──────────────────────────────
+# Python
+# ──────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg
+*.egg-info/
+*.manifest
+*.spec
+.eggs/
+pip-log.txt
+pip-delete-this-directory.txt
+htmlcov/
+.tox/
+.nox/
+.coverage
+coverage.xml
+.cache/
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+.ipynb_checkpoints/
+*.ipynb~
+
+# Jupyter Notebook hidden checkpoint files
+**/.ipynb_checkpoints
+
+# Python virtual environments
+venv/
+ENV/
+env/
+.venv/
+.ENV/
+.venv.bak/
+env.bak/
+env.old/
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# ──────────────────────────────
+# Data Science / Machine Learning
+# ──────────────────────────────
+# Model binaries and output
+*.h5
+*.hdf5
+*.ckpt
+*.tflite
+*.pb
+*.pt
+*.pth
+*.onnx
+*.joblib
+*.pkl
+*.pickle
+*.npz
+*.npy
+
+# Training logs and results
+logs/
+tensorboard/
+lightning_logs/
+mlruns/
+wandb/
+*.log
+
+# Experiment artifacts
+checkpoints/
+results/
+output/
+runs/
+experiments/
+
+# ──────────────────────────────
+# Debian/Linux Specific
+# ──────────────────────────────
+*~
+.*.swp
+.*.swo
+.DS_Store
+Thumbs.db
+.Trashes
+ehthumbs.db
+lost+found/
+*.bak
+*.backup
+*.old
+*.orig
+
+# System files and temporary cache
+.cache/
+*.lock
+tmp/
+temp/
+*.tmp
+*.log
+
+# ──────────────────────────────
+# VS Code / IDEs / JetBrains
+# ──────────────────────────────
+.vscode/
+.idea/
+*.code-workspace
+
+# ──────────────────────────────
+# OS-level Trash and Backup
+# ──────────────────────────────
+~$*
+*.tmp
+*.swp
+*.swo
+*.swn
+*.sml
+*.suo
+
+# ──────────────────────────────
+# Git / Repo Tools
+# ──────────────────────────────
+.git/
+.gitattributes
+.githooks/
+.gitmodules
+.gitignore.local
+
+# ──────────────────────────────
+# Custom Dev Artifacts
+# ──────────────────────────────
+logs/
+*.log
+*.out
+*.bak
+*.dump
+debug/
+__results__/
+artifacts/
+reports/
+test-output/
+
+# ──────────────────────────────
+# Docker
+# ──────────────────────────────
+Dockerfile
+docker-compose.yml
+.dockerignore
+*.container
+*.tar
+*.img
+*.pid
+
+# ──────────────────────────────
+# Conda / Poetry / Pipenv
+# ──────────────────────────────
+*.lock
+poetry.lock
+Pipfile.lock
+*.conda
+*.env
+*.envrc
+.envrc
+
+# ──────────────────────────────
+# Misc
+# ──────────────────────────────
+*.sqlite3
+*.db
+*.log
+*.pdf
+*.csv
+*.tsv
+*.xls
+*.xlsx
+*.parquet
+*.feather
+*.arrow
+
+# Don't track any output or analysis data unless explicitly needed
+data/
+datasets/
+models/
+outputs/
+predictions/
+
+
