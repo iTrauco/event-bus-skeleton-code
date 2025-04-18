@@ -1,10 +1,3 @@
-# NEW VERSION - Original backed up to: orig.start_2025-04-17_17-06.sh 
-# Version date: Thu Apr 17 05:06:51 PM EDT 2025 
-# Git branch: debug/terminal-event-error-handling-framewwork-restore 
-# Last commit: debug: event error handling browser to terminal broken 
-
-
-
 #!/bin/bash
 
 # Window position tracking config
